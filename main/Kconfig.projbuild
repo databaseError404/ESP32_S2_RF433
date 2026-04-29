@@ -3,8 +3,21 @@ menu "Application settings"
     config RF_RECEIVER_GPIO
         int "RF433 receiver GPIO"
         range 0 46
-        default 4
+        default 17
         help
             GPIO number where DATA pin of 315/433 MHz RF receiver module is connected.
+
+    config LED_GPIO
+        int "LED GPIO"
+        range 0 46
+        default 15
+        help
+            GPIO number where status LED is connected.
+
+    config LED_ACTIVE_HIGH
+        bool "LED active high"
+        default y
+        help
+            Enable if LED turns on when GPIO level is HIGH.
 
 endmenu

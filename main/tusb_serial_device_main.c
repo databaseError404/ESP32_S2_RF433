@@ -15,10 +15,27 @@
 #include "tinyusb.h"
 #include "tusb_cdc_acm.h"
 #include "sdkconfig.h"
+#include "driver/gpio.h"
 #include "driver/rf_receiver.h"
+
+#ifndef CONFIG_LED_GPIO
+#define CONFIG_LED_GPIO 15
+#endif
+
+#ifndef CONFIG_LED_ACTIVE_HIGH
+#define CONFIG_LED_ACTIVE_HIGH 1
+#endif
 
 static const char *TAG = "example";
 static uint8_t rx_buf[CONFIG_TINYUSB_CDC_RX_BUFSIZE + 1];
+
+#if CONFIG_LED_ACTIVE_HIGH
+#define LED_ON_LEVEL  1
+#define LED_OFF_LEVEL 0
+#else
+#define LED_ON_LEVEL  0
+#define LED_OFF_LEVEL 1
+#endif
 
 #define RF_USB_CDC_PORT TINYUSB_CDC_ACM_0
 
@@ -46,6 +63,24 @@ static const char *rf_action_to_str(uint8_t action)
     }
 }
 
+static void led_init(void)
+{
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << CONFIG_LED_GPIO),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&io_conf));
+    ESP_ERROR_CHECK(gpio_set_level(CONFIG_LED_GPIO, LED_OFF_LEVEL));
+}
+
+static inline void led_set(bool on)
+{
+    gpio_set_level(CONFIG_LED_GPIO, on ? LED_ON_LEVEL : LED_OFF_LEVEL);
+}
+
 static void rf_publish_to_usb_and_log(const rf_event_t *rfcode)
 {
     char line[128];
@@ -63,12 +98,15 @@ static void rf_publish_to_usb_and_log(const rf_event_t *rfcode)
 
     switch (rfcode->action) {
     case RF_ACTION_START:
+        led_set(true);
         ESP_LOGI(TAG, "start:    %06llX (protocol: %02hX, %u bits)", rfcode->raw_code, rfcode->protocol, rfcode->bits);
         break;
     case RF_ACTION_CONTINUE:
+        led_set(true);
         ESP_LOGI(TAG, "continue: %06llX (protocol: %02hX, %u bits)", rfcode->raw_code, rfcode->protocol, rfcode->bits);
         break;
     case RF_ACTION_STOP:
+        led_set(false);
         ESP_LOGI(TAG, "stop:     %06llX (protocol: %02hX, %u bits)", rfcode->raw_code, rfcode->protocol, rfcode->bits);
         break;
     default:
@@ -149,6 +187,8 @@ void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *event)
 
 void app_main(void)
 {
+    led_init();
+
     // Create FreeRTOS primitives
     app_queue = xQueueCreate(5, sizeof(app_message_t));
     assert(app_queue);
