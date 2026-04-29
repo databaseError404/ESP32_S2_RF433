@@ -1,0 +1,19 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.openOcdConfigs": [
+    "interface/ftdi/esp32_devkitj_v1.cfg",
+    "target/esp32s2.cfg"
+  ],
+  "idf.portWin": "COM82",
+  "idf.currentSetup": "C:\\Users\\user\\esp\\v5.4.1\\esp-idf",
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s2"
+  },
+  "clangd.path": "C:\\Users\\user\\.espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=h:\\2026\\quiz\\ESP32_S2_RF433\\build"
+  ],
+  "idf.flashType": "UART"
+}

@@ -1,0 +1,10 @@
+menu "Application settings"
+
+    config RF_RECEIVER_GPIO
+        int "RF433 receiver GPIO"
+        range 0 46
+        default 4
+        help
+            GPIO number where DATA pin of 315/433 MHz RF receiver module is connected.
+
+endmenu
